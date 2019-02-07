@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
 using TestOpenID.Controllers;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace TestOpenID
 {
@@ -38,9 +39,23 @@ namespace TestOpenID
                     Description = "The Catalog Microservice HTTP API. This is a OpenId microservices example",
                     TermsOfService = "Terms Of Service"
                 });
+
+                var security = new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", new string[] { }},
+                };
+
+                options.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey"
+                });
+                options.AddSecurityRequirement(security);
             });
 
-            string domain = $"http://{Configuration["Auth0:Domain"]}/";
+            string domain = $"https://{Configuration["Auth0:Domain"]}/";
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
