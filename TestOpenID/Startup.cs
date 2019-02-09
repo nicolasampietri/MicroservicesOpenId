@@ -12,6 +12,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
 using TestOpenID.Controllers;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Claims;
 
 namespace TestOpenID
 {
@@ -43,6 +45,7 @@ namespace TestOpenID
                 var security = new Dictionary<string, IEnumerable<string>>
                 {
                     {"Bearer", new string[] { }},
+                    {"Type", new string[] { "OpenId" }},
                 };
 
                 options.AddSecurityDefinition("Bearer", new ApiKeyScheme
@@ -52,6 +55,14 @@ namespace TestOpenID
                     In = "header",
                     Type = "apiKey"
                 });
+                options.AddSecurityDefinition("Type", new ApiKeyScheme
+                {
+                    Description = "JWT Type",
+                    Name = "Type",
+                    In = "header",
+                    Type = "apiKey"
+                });
+
                 options.AddSecurityRequirement(security);
             });
 
@@ -66,15 +77,30 @@ namespace TestOpenID
                 options.Authority = domain;
                 options.Audience = Configuration["Auth0:ApiIdentifier"];
                 options.RequireHttpsMetadata = false;
+                //Additional config snipped
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async ctx =>
+                    {
+                        string authenticationType = ctx.Request.Headers["Type"];
+                        var claims = new List<Claim>{
+                            new Claim("Type", authenticationType)
+                        };
+                        var appIdentity = new ClaimsIdentity(claims);
+                        ctx.Principal.AddIdentity(appIdentity);
+                    }
+                };
             });
 
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("read:messages", policy => policy.Requirements.Add(new HasScopeRequirement("read:messages", domain)));
+                options.AddPolicy("Dynamic",policy => policy.Requirements.Add(new DynamicAuthenticationRequirement("read:messages", domain,"OpenId")));
             });
 
             // register the scope authorization handler
             services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+            services.AddSingleton<IAuthorizationHandler, DynamicAuthenticationSelectorHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

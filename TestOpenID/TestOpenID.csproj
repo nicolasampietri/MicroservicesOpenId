@@ -17,4 +17,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties __JSONSchema="" /></VisualStudio></ProjectExtensions>
+
 </Project>

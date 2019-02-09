@@ -31,9 +31,10 @@ namespace TestOpenID.Controllers
 
         // GET api/openid/5
         [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
+        [Authorize("Dynamic")]
+        public ActionResult<IEnumerable<string>> Get(int id)
         {
-            return "value";
+            return new string[] { "DynamicAuth", "value2", "value3" };
         }
 
         // POST api/openid
