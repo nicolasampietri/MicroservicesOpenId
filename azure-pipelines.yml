@@ -10,7 +10,7 @@ pool:
   vmImage: 'Ubuntu-16.04'
 
 variables:
-  imageName: 'MicroservicesOpenId:$(build.buildId)'
+  imageName: 'microservicesopenid:$(build.buildId)'
 
 steps:
 - script: docker build -f TestOpenID/Dockerfile -t $(imageName) .
