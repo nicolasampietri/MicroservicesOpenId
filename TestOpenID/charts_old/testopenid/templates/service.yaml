@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "testopenid.fullname" . }}
+  labels:
+    app: {{ template "testopenid.name" . }}
+    chart: {{ template "testopenid.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "testopenid.name" . }}
+    release: {{ .Release.Name }}
